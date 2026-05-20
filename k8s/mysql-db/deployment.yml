@@ -1,0 +1,107 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: school-portal-app-3-tier
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: mysql123
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: school-portal-app-3-tier
+data:
+  MYSQL_DATABASE: school
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: school-portal-app-3-tier
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS school;
+
+    USE school;
+
+    CREATE TABLE IF NOT EXISTS student (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(40), roll_number INT,
+    class VARCHAR(16));
+
+    CREATE TABLE IF NOT EXISTS teacher (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(40), subject VARCHAR(40),
+    class VARCHAR(16));
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: school-portal-app-3-tier
+spec:
+  clusterIP: None
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: school-portal-app-3-tier
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:oraclelinux9
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-config
+                  key: MYSQL_DATABASE
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: initdb
+          configMap:
+            name: mysql-initdb-config
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-persistent-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 5Gi
+
