@@ -6,8 +6,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 5000
-      targetPort: 5000
+    - port: 3500
+      targetPort: 3500
       name: http
   selector:
     app: backend
@@ -28,7 +28,7 @@ spec:
         app: backend
     spec:
       containers:
-      - name: backend
+      - name: school-admin-api-service
         image: yaathvik20/school-mern-backend:v1
         imagePullPolicy: Always
         ports:

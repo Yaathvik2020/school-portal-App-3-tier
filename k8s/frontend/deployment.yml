@@ -28,7 +28,7 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: frontend
+      - name: school-admin-gui-service
         image: yaathvik20/school-mern-frontend:v1
         imagePullPolicy: Always
         ports:
@@ -52,7 +52,7 @@ spec:
             port: 80
           initialDelaySeconds: 10
           periodSeconds: 5
-        
+
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

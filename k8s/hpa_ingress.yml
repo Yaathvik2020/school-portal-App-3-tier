@@ -16,28 +16,7 @@ spec:
             name: frontend
             port:
               number: 80
-      - path: /student 
-        pathType: Prefix
-        backend:
-          service:
-            name: backend
-            port:
-              number: 3500
-      - path: /teacher
-        pathType: Prefix
-        backend:
-          service:
-            name: ratings-service
-            port:
-              number: 3500
-      - path:  /addteacher
-        pathType: Prefix
-        backend:
-          service:
-            name: backend
-            port:
-              number: 3500
-      - path:  /addstudent
+      - path: /api 
         pathType: Prefix
         backend:
           service:
